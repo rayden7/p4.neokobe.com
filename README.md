@@ -38,7 +38,7 @@ Then run these commands from a terminal:
     $ cd hilo
 
     $ meteor
-    Runnong on: http://localhost:3000/
+    Running on: http://localhost:3000/
 
 Now open up a local browser and navigate to http://localhost:3000/.  Go ahead, open up TWO browsers!  When you enter
 your email address and start a game, you will begin to see the email and your high score show up in both browser
