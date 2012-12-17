@@ -1,0 +1,364 @@
+<head>
+    <title>CSCI-E 75: PS4 - Hi-Lo Card Game</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+</head>
+
+<body>
+    {{> newPlayerDialogTemplate}}
+    {{> headerTemplate}}
+    {{> playerStatusTemplate}}
+
+    <article>
+        {{> playingAreaTemplate}}
+        {{> scoreboardTemplate}}
+    </article>
+  
+    {{> footerTemplate}}
+</body>
+
+
+<!-- HANDLEBARS templates go here -->
+
+<template name="errorTemplate">
+    <div id="error"></div>
+</template>
+
+
+<template name="newPlayerDialogTemplate">
+    <!-- pop-up modal to ask for player's email to begin game -->
+    <div id="dialog-modal" title="Welcome new player!">
+        {{> errorTemplate}}
+        <p>Enter your email address to play:</p>
+        <form id="emailForm" name="emailForm">
+            <input type="text" id="userEmail" name="userEmail" />
+            <input type="button" id="play" name="play" value="Play" />
+        </form>
+    </div>
+</template>
+
+
+<template name="headerTemplate">
+    <header>
+        <div id="header-title">
+            <div id="toggle">
+                <span id="header-toggle" class="expanded-up">&raquo;</span>
+            </div>
+            <h1>Hi-Lo Card Game</h1>
+        </div>
+        <div id="header-description">
+            <img id="hilo-img" src="hi-lo-150x.jpg" width="150" height="150" alt="Hi-Lo card game" title="Hi-Lo card game" />
+            <p>This is a psuedo-clone of the
+                <a href="http://blog.zyngapoker.com/2012/01/new-hi-lo-feature-chance-to-win-millions-of-chips.html" target="_blank">Hi-Lo card mini-game</a>
+                which was added to <a href="http://company.zynga.com/games/zynga-poker" target="_blank">Zynga Poker</a> earlier this year.
+                It is different however, in a very important regard; rather than being a typical JavaScript web application,
+                this implementation uses <a href="http://www.meteor.com" target="_blank">Meteor</a> as the application
+                server, which means that realtime updates are "pushed" to all browsers viewing the same web page
+                simultaneously (no browser refreshing needed!).  <a href="http://www.meteor.com" target="_blank">Meteor</a>
+                uses <a href="http://nodejs.org/" target="_blank">Node.js</a> (with
+                <a href="https://npmjs.org/package/fibers" target="blank">fibers</a>) as the primary mechanic
+                of "pushing" data out to all clients as it is updated, but <a href="http://www.meteor.com" target="_blank">Meteor</a>
+                itself offers several other features (including being able to write pure JavaScript on both the client and
+                server, <a href="http://www.meteor.com/faq" target="_blank">and many other cool features</a>).</p>
+            <p>Here is how to play Hi-Lo:
+            <ul>
+                <li>Enter your email address to uniquely identify yourself</li>
+                <li>Two cards are drawn; one face-up, one face-down</li>
+                <li>Guess whether the face-down card is a lower rank or higher rank than the face-up card by
+                      clicking on the <span class="arrowUpSmall">&#x25B2;</span> or
+                    <span class="arrowDownSmall">&#x25BC</span> arrows</li>
+                <li>If you guess correctly, you win!  Continue to guess until you guess wrong, and win progressively larger jackpots</li>
+                <li>High-scores are saved on the server in a <a href="http://docs.meteor.com/#collections" target="_blank">Meteor.Collection</a> 
+                    (which uses Minimongo as the backing store) and pushed out asynchronously and using web sockets (Node.js) to all 
+                    people viewing the page</li>
+            </ul>
+        </div>
+    </header>
+</template>
+
+
+<template name="playerStatusTemplate">
+    <div id="playerStatus">
+        <p>Playing as: <span id="currentPlayer">{{player_email}}</span> <a id="playerChange">[change player]</a></p>
+    </div>   
+</template>
+
+
+<template name="gameInfoTemplate">
+    <div id="gameStatus">
+        <div class="gameInfo">
+            <span class="outcome">you win!</span>
+        </div>
+    </div>
+</template>
+
+
+<template name="playingAreaCardsTemplate">
+    <div id="playingAreaCards">
+        <div class="leftColumn">
+            <div id="faceUpCard"></div>
+        </div>
+        <div class="centerColumn">
+            <div id="selectionArea">
+                <div id="higher">
+                    <span class="arrowUp">&#x25B2;</span>
+                </div>
+                <div id="lower">
+                    <span class="arrowDown">&#x25BC</span>
+                </div>
+            </div>
+        </div>
+        <div class="rightColumn">
+            <div id="faceDownCard"></div>
+        </div>
+    </div>
+</template>
+
+
+<template name="winningTemplate">
+    <div id="winnings">
+        <div class="gameInfo">
+            <span id="winningsHeader">You've won: </span>
+            <span id="winningsTally">$100</span>
+        </div>
+    </div>
+</template>
+
+
+<template name="playingAreaTemplate">
+    <div id="playingArea">
+        {{> gameInfoTemplate}}
+        {{> playingAreaCardsTemplate}}
+        {{> winningTemplate}}
+    </div>
+</template>
+
+
+<template name="scoreboardTemplate">
+    <div id="scoreboard">
+        <h3>Highest Jackpots</h3>
+        <!-- uses CSS list styling from here: http://www.456bereastreet.com/archive/201105/styling_ordered_list_numbers/ -->
+        <div id="hiScores">
+            <ol>
+            {{#if players}}
+                {{#each players}}
+                    <li>{{email}} <span class="score">${{score}}</span></li>
+                {{/each}}
+            {{/if}}
+            </ol>
+        </div>
+    </div>
+</template>
+
+
+<template name="footerTemplate">
+    <footer>
+        <h3>&copy; 2012 David Killeffer.  All Rights Reserved.</h3>
+    </footer>
+</template>
+
+
+
+
+<!-- ************************************************************************************************ -->
+<!-- ************************************************************************************************ -->
+<!--                                                                                                  -->
+<!--                                 Handlebars Card TEMPLATES                                        -->
+<!--                                                                                                  -->
+<!--             Handlebars templates for card divs; for more info, see the README.md                 -->
+<!--                                                                                                  -->
+<!-- ************************************************************************************************ -->
+<!-- ************************************************************************************************ -->
+
+<template name="card-template-2">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotB2">{{cardSuitSymbol}}</div>
+            <div class="spotB4">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-3">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotB3">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-4">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-5">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotB3">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-6">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA3">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC3">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-7">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA3">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotB3">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC3">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-8">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA2">{{cardSuitSymbol}}</div>
+            <div class="spotA4">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC2">{{cardSuitSymbol}}</div>
+            <div class="spotC4">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-9">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA2">{{cardSuitSymbol}}</div>
+            <div class="spotA4">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotB3">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC2">{{cardSuitSymbol}}</div>
+            <div class="spotC4">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-10">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotA2">{{cardSuitSymbol}}</div>
+            <div class="spotA4">{{cardSuitSymbol}}</div>
+            <div class="spotA5">{{cardSuitSymbol}}</div>
+            <div class="spotB2">{{cardSuitSymbol}}</div>
+            <div class="spotB4">{{cardSuitSymbol}}</div>
+            <div class="spotC1">{{cardSuitSymbol}}</div>
+            <div class="spotC2">{{cardSuitSymbol}}</div>
+            <div class="spotC4">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-J">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <img class="face" src="graphics/jack.gif" alt="{{cardName}}" />
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-Q">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <img class="face" src="graphics/queen.gif" alt="{{cardName}}" />
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-K">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <img class="face" src="graphics/king.gif" alt="{{cardName}}" />
+            <div class="spotA1">{{cardSuitSymbol}}</div>
+            <div class="spotC5">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
+
+<template name="card-template-A">
+    <!-- {{cardName}} -->
+    <div class="card">
+        <div class="cardback {{cardColor}}"></div>
+        <div class="cardfront {{cardColor}}">
+            <div class="index">{{cardRank}}<br />{{cardSuitSymbol}}</div>
+            <div class="spotB3 aceicon">{{cardSuitSymbol}}</div>
+        </div>
+    </div>
+</template>
