@@ -146,8 +146,9 @@ if (Meteor.isClient) {
             }
             // email is valid, register email and close dialog box, begin game
             else {
-                //var newPlayer = { "email": email, game_id: 123, score: 0, streak: 0, idle: false };
-                var newPlayer = { "email": email, game_id: 123, score: 10000, streak: 0, idle: false };
+                //// this was just a test to insert a player with a non-zero score to see how the sorting was working before that logic is built
+                //var newPlayer = { "email": email, game_id: 123, score: 10000, streak: 0, idle: false };
+                var newPlayer = { "email": email, game_id: 123, score: 0, streak: 0, idle: false };
                 var player_id = Players.insert(newPlayer);
                 if ( !setPlayerEmail(email) ) {
                     alert('Sorry, your browser either does not support cookies or localStorage; can\'t let you play. Please try a newer browser.');
