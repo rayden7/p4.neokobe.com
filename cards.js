@@ -1,5 +1,4 @@
 
-
 /******************************************************************************
  * Playing Card Objects                                                       *
  *                                                                            *
@@ -13,6 +12,7 @@
  *     for use in Fall 2012, CSCI-E 75 Dynamic Web Applications class,        *
  *     Harvard University Extension School                                    *
  ******************************************************************************/
+
 
 //=============================================================================
 // Card Object
@@ -140,16 +140,12 @@ function cardCreateNode() {
             break;
      }
 
-    // use Handlebars.js to build out the HTML for the card based on the card's rank template
+    // use Handlebars.js to build out the HTML for the card based on the card's rank template,
+    // but use the pre-compiled Meteor template that was defined in index.html - that is why
+    // below we need to eval() and compile the template with our passed card context{} data
 
     // this is the script identifier of the template to use based on this card's rank
-    var templateID = "#card-template-" + this.rank;
-
-    // read in the actual template code
-    var cardTemplate = $(templateID).html();
-
-    // compile the template, preparing it for variable replacement
-    var cardTemplateCompiled = Handlebars.compile(cardTemplate);
+    var templateID = "cardTemplate" + this.rank;
 
     // set up the variables that will be replaced in the compiled template
     var context  = {
@@ -160,7 +156,9 @@ function cardCreateNode() {
                    };
 
     // perform the variable substitution in the compiled template - the output is the raw HTML
-    var html = cardTemplateCompiled(context);
+    var html = (eval('Template.'+templateID))(context);
+
+    alert('card display HTML:\n\n' + html);
 
     // Return the card node.
     return html;

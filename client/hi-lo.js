@@ -157,15 +157,19 @@ if (Meteor.isClient) {
                 $("#error").hide();
                 $("#error").text('');
                 hideNewPlayerModal();
+
+                // start up a new game
+                beginNewGame();
             }
             // don't actually perform an HTTP POST/GET submission
             evt.preventDefault();
+            evt.stopPropagation();
         },
     });
 
     // when showing the playerStatus div, look up and display the email that the user is currently playing as
     Template.playerStatusTemplate.helpers({
-        player_email: function() {            
+        player_email: function() {
             return getPlayerEmail();
         },
     });
@@ -206,8 +210,9 @@ if (Meteor.isClient) {
             }
         }, 
     });
-  
+
 }
+
 
 
 Template.scoreboardTemplate.players = function() {
