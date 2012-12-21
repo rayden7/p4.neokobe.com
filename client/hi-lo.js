@@ -115,6 +115,10 @@ function hideNewPlayerModal() {
 }
 
 
+function testGuess() {
+    return faceUpCard.compareTo(faceDownCard);
+}
+
 
 //////
 ////// client-side display logic
@@ -164,6 +168,65 @@ if (Meteor.isClient) {
             // don't actually perform an HTTP POST/GET submission
             evt.preventDefault();
             evt.stopPropagation();
+        },
+    });
+
+
+    Template.playingAreaCardsTemplate.events({
+        'click span.arrowUp' : function(evt) {
+            //alert('clicked HIGHER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
+            alert('clicked HIGHER guess');
+
+            // TODO: turn over the face-down card to reveal it
+            $("#faceDownCard > div.card > div.cardback").css('visibility','hidden');
+            $("#faceDownCard > div.card > div.cardfront").css('visibility','visible');
+            $("#faceDownCard > div.card > div.cardfront").fadeIn("slow");
+
+
+            var cardComparisonResult = testGuess();
+            if (cardComparisonResult == 1) {
+                // player lost - faceUpCard is of a higher rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
+
+                // TODO: show losing info, update displays, prize count, update Player object in collection, etc.
+                alert('you lose!');
+
+            } else if (cardComparisonResult == -1) {
+                // player wins - faceUpCard is of a lower rank than faceDownCard, and the player guessed that the faceDownCard was higher than faceUpCard
+
+                // TODO: show winning info, update displays, prize count, update Player object in collection, etc.
+                alert('you win!');
+
+            }
+
+
+
+
+        },
+        'click span.arrowDown' : function(evt) {
+            //alert('clicked LOWER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
+            alert('clicked LOWER guess');
+
+            // TODO: turn over the face-down card to reveal it
+            $("#faceDownCard > div.card > div.cardback").css('visibility','hidden');
+            $("#faceDownCard > div.card > div.cardfront").css('visibility','visible');
+            $("#faceDownCard > div.card > div.cardfront").fadeIn("slow");
+
+            var cardComparisonResult = testGuess();
+            if (cardComparisonResult == 1) {
+                // player wins - faceUpCard is of a higher rank than faceDownCard, and the player guessed that the faceDownCard was lower than faceUpCard
+
+                // TODO: show winning info, update displays, prize count, update Player object in collection, etc.
+                alert('you win!');
+
+            } else if (cardComparisonResult == -1) {
+                // player loses - faceUpCard is of a lower rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
+
+                // TODO: show winning info, update displays, prize count, update Player object in collection, etc.
+                alert('you lose!');
+
+            }
+
+
         },
     });
 

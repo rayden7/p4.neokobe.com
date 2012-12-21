@@ -66,6 +66,8 @@ function newDeck() {
     deck.shuffle(numShuffles);
 }
 
+// recursive function that will draw two cards at a time, check that they are
+// valid, and continue to draw more cards until two suitable ones are selected
 function drawCards(currentDeck) {
 
     var potentialFaceUpCard, potentialFaceDownCard;
@@ -81,12 +83,15 @@ function drawCards(currentDeck) {
     }
     else if (currentDeck.cardCount() >= 2) {
 
-        potentialFaceUpCard = deck.deal();
-        //if (potentialFaceUpCard.rank == "A" || potentialFaceUpCard.rank == "2") drawCards(currentDeck);
-        potentialFaceDownCard = deck.deal();
-        //if (potentialFaceDownCard.rank == potentialFaceUpCard.rank) drawCards(currentDeck);
+        //potentialFaceUpCard = deck.deal();
+        //potentialFaceDownCard = deck.deal();
 
-        if (!testCardsValid(potentialFaceUpCard,potentialFaceDownCard)) drawCards(currentDeck);
+        // DEBUGGING
+        potentialFaceUpCard = new Card("K", "D");
+        potentialFaceDownCard = new Card("Q", "H");
+
+        if (!testCardsValid(potentialFaceUpCard,potentialFaceDownCard))
+            drawCards(currentDeck);
 
         faceUpCard = potentialFaceUpCard;
         faceDownCard = potentialFaceDownCard;
@@ -100,12 +105,10 @@ function drawCards(currentDeck) {
 // and that the cards are not of the same rank
 function testCardsValid(cardOne, cardTwo) {
 
-    if (cardOne.rank == "A" || cardOne.rank == "2")
-        return false;
-    if (cardOne.rank == cardTwo.rank)
+    if (cardOne.rank == "A" || cardOne.rank == "2" || cardOne.rank == cardTwo.rank)
         return false;
 
-    // both conditions satisfied - cards are valid!
+    // all conditions satisfied - cards are valid!
     return true;
 }
 
@@ -129,32 +132,37 @@ function beginNewGame() {
     //alert("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
     //console.log("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
 
-    // TODO: manipulate the templates and DOM to show cards appropriately
-
     setUpGameBoard();
-
 }
 
 function setUpGameBoard() {
 
-    alert("setUpGameBoard():\n\tfaceUpCard: [" + faceUpCard.toString() + "]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
+    //alert("setUpGameBoard():\n\tfaceUpCard: [" + faceUpCard.toString() + "]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
     // should have valid faceUpCard and faceDownCard values
 
     var cardNodeUp = faceUpCard.createNode();
     var cardNodeDown = faceDownCard.createNode();
 
-    alert("setUpGameBoard():\n\tfaceUpCard: [" + faceUpCard.toString() + "]\n\tcardNodeUp: [" + cardNodeUp + "]\n\tfaceDownCard: [" + faceDownCard.toString() + "]\n\tcardNodeDown: ["+cardNodeDown+"]");
+    //alert("setUpGameBoard():\n\tfaceUpCard: [" + faceUpCard.toString() + "]\n\tcardNodeUp: [" + cardNodeUp + "]\n\tfaceDownCard: [" + faceDownCard.toString() + "]\n\tcardNodeDown: ["+cardNodeDown+"]");
     console.log("setUpGameBoard():\n\tfaceUpCard: [" + faceUpCard.toString() + "]\n\tcardNodeUp: [" + cardNodeUp + "]\n\tfaceDownCard: [" + faceDownCard.toString() + "]\n\tcardNodeDown: ["+cardNodeDown+"]");
 
     $("#faceUpCard").children().remove();
     $("#faceUpCard").show();
     $("#faceUpCard").css('visibility','visible');
-    //$("#faceUpCard").append( faceupCard.createNode() );
-    $("#faceUpCard").append( cardNodeUp );
-    //$("#faceUpCard").append( cardNodeUp ).slideDown( 'slow' );
 
+    //$("#faceUpCard").append( faceupCard.createNode() );
+    //$("#faceUpCard").append( cardNodeUp );
+
+    //$("#faceUpCard").append( cardNodeUp ).slideDown( 'slow' );
     //var cardUp = $(cardNodeUp).hide();
     //cardUp.appendTo($("#faceUpCard"), function(){ cardUp.slideDown('slow'); } );
+
+    $("#faceUpCard").append(cardNodeUp);
+    $("#faceUpCard > div.card").hide();
+    $("#faceUpCard > div.card").slideDown("slow");
+
+
+
 
 
     // for the face down-card, we need to do some manipulation of the inner content to show the div classed
@@ -173,13 +181,35 @@ function setUpGameBoard() {
     $("#faceDownCard").show();
     $("#faceDownCard").css('visibility','visible');
     //$("#faceUpCard").append( faceupCard.createNode() );
-    $("#faceDownCard").append( cardNodeDown );
+    //$("#faceDownCard").append( cardNodeDown );
+
+
+    $("#faceDownCard").append(cardNodeDown);
+    $("#faceDownCard > div.card").hide();
+    $("#faceDownCard > div.card").slideDown("slow");
+
 
     //$(cardNodeDown).hide();
     //$(cardNodeDown).appendTo($("#faceDownCard")).slideDown('slow');
 
 
 }
+
+
+
+/*
+$("#higher span.arrowUp").click(function(){
+
+    alert('clicked HIGHER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
+
+
+});
+
+$("#lower span.arrowDown").click(function(){
+
+    alert('clicked LOWER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
+});
+*/
 
 
 /*

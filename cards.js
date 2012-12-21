@@ -24,7 +24,6 @@
 // Card constructor function.
 //-----------------------------------------------------------------------------
 
-
 function Card(rank, suit) {
     this.rank = rank;
     this.suit = suit;
@@ -157,8 +156,6 @@ function cardCreateNode() {
 
     // perform the variable substitution in the compiled template - the output is the raw HTML
     var html = (eval('Template.'+templateID))(context);
-
-    alert('card display HTML:\n\n' + html);
 
     // Return the card node.
     return html;

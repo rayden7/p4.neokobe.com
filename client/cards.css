@@ -205,24 +205,30 @@ footer {
 #playingAreaCards,
 #battlefieldCards {
     overflow: auto;
+    overflow: hidden;
 }
 
 .leftColumn,
 .centerColumn,
 .rightColumn {
-    width: 125px;
     float: left;
-    margin: 0 5px 0 5px;
+    margin: 0;
+    padding: 0;
     background-color: transparent;
 }
+
+.leftColumn,
+.rightColumn {
+    width: 132px;
+}
+
+.leftColumn { }
 
 .centerColumn {
     width: 100px;
 }
 
-.rightColumn {
-    float: right;
-}
+.rightColumn { }
 
 #scoreboard h3 {
     font-size: 2em;
@@ -448,13 +454,21 @@ ol ol li:last-child { margin-bottom:0; }
     float: right;
 }
 
+/* for the face-up card, don't show the back of the card div */
 #faceUpCard > div.card > div.cardback {
     display: none;
 }
 
+/* for the face-down card, don't show the front of the card div */
 #faceDownCard > div.card > div.cardfront {
     display: none;
 }
+
+/*
+#faceDownCard > div.card > div.cardback {
+    display: inline-block;
+}
+*/
 
 #faceDownCard,
 #playerBattlefield {
@@ -467,9 +481,6 @@ ol ol li:last-child { margin-bottom:0; }
     float: left;
 }
 
-#faceDownCard > div.card > div.cardfront {
-    display: none;
-}
 
 
 /******************************************************************************
@@ -492,25 +503,24 @@ ol ol li:last-child { margin-bottom:0; }
     border-radius: 0.5em;
     -moz-border-radius: 0.5em;
     -webkit-border-radius: 0.5em;
+
+    background-color: #ffffff;
 }
 
 .cardback {
     /*display: none !important;*/
-    background-image: url("../graphics/cardback.gif");
+    border-color: #808080 #000000 #000000 #808080;
+    background-image: url("../cardback.gif");
     border-radius: 0.5em;
     -moz-border-radius: 0.5em;
     -webkit-border-radius: 0.5em;
     width: 100%;
     height: 100%;
-    display: block;
-    transform: rotateY(180deg);
-    box-sizing: border-box;
 }
 
 .cardfront,
 .front {
-    background-color: transparent;
-    background-color: #ffffff;
+    border-color: #808080 #000000 #000000 #808080;
     color: #000000;
     width: 100%;
     height: 100%;
