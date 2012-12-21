@@ -198,6 +198,7 @@ if (Meteor.isClient) {
 
             }
 
+            // fade out the current shown cards, remove them from their parent container divs, hide the up/down arrows, update the scoreboard
 
 
 
@@ -225,7 +226,6 @@ if (Meteor.isClient) {
                 alert('you lose!');
 
             }
-
 
         },
     });
