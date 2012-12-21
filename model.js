@@ -14,26 +14,28 @@ Players = new Meteor.Collection('players');
 // {
 //     email: 'rayden7@gmail.com', 
 //     game_id: 123, 
-//     score: 10000, 
+//     currentScore: 10000,
+//     maxScore: 10000,
 //     streak: 3, // how many consecutive times the player guess the correct hi/lo value 
 //     idle: false, 
 // }
 
 
-//var faceUpCard = function() { };
-//var faceDownCard = function() { };
 var faceUpCard, faceDownCard = null;
 
 var numCards = 52;  // 1 standard sized deck has 52 cards
 var numPacks = 1;  // 1 standard sized deck has 52 cards
 
-// determines how many consecutive wins before bumping up to the next prizeTier
-var winningTiers = new Array(2,4,6,8,10,12,14,18,20,25);
-var prizeTiers = new Array(100,300,500,1000,5000,10000,50000,100000,1000000,5000000);
-var gameLevel = 0;
+//// determines how many consecutive wins before bumping up to the next prizeTier
+//var winningTiers = new Array(2,4,6,8,10,12,14,18,20,25);
+//var prizeTiers = new Array(100,300,500,1000,5000,10000,50000,100000,1000000,5000000);
+//var gameLevel = 0;
 
-//var numCardsPerDeck = 52;
 var numDecks = 1;
+
+
+var curStreak = 0;
+var curScore = 0;
 
 var numShuffles = 10;  // how many times to shuffle the cards when calling "shuffleDeck"
 
@@ -83,12 +85,12 @@ function drawCards(currentDeck) {
     }
     else if (currentDeck.cardCount() >= 2) {
 
-        //potentialFaceUpCard = deck.deal();
-        //potentialFaceDownCard = deck.deal();
+        potentialFaceUpCard = deck.deal();
+        potentialFaceDownCard = deck.deal();
 
-        // DEBUGGING
-        potentialFaceUpCard = new Card("K", "D");
-        potentialFaceDownCard = new Card("Q", "H");
+        //// DEBUGGING
+        //potentialFaceUpCard = new Card("K", "D");
+        //potentialFaceDownCard = new Card("Q", "H");
 
         if (!testCardsValid(potentialFaceUpCard,potentialFaceDownCard))
             drawCards(currentDeck);
@@ -119,6 +121,9 @@ function beginNewGame() {
 
     newDeck();
 
+    continueGame();
+
+/*
     //alert('just created a new deck of cards, containing: ' + deck.toString() );
     //console.log('just created a new deck of cards, containing: ' + deck.toString() );
 
@@ -133,7 +138,27 @@ function beginNewGame() {
     //console.log("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
 
     setUpGameBoard();
+*/
+
 }
+
+
+// continue an existing game
+function continueGame() {
+
+    // draw two cards, as long as:
+    //
+    // - the first card, the face-up card, IS NOT an Ace, or a 2 (we can't have the face-up card not
+    //       have a higher or lower card or the game doesn't work)
+    // - the second card, the face-down card, IS NOT the same rank as the first card
+    drawCards(deck);
+
+    //alert("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
+    //console.log("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
+
+    setUpGameBoard();
+}
+
 
 function setUpGameBoard() {
 

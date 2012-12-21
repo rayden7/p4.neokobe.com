@@ -86,7 +86,8 @@
 <template name="gameInfoTemplate">
     <div id="gameStatus">
         <div class="gameInfo">
-            <span class="outcome">you win!</span>
+            <!--<span class="outcome">you win!</span>-->
+            <span class="outcome">{{game_status_summary}}</span>
         </div>
     </div>
 </template>
@@ -103,7 +104,7 @@
                     <span class="arrowUp">&#x25B2;</span>
                 </div>
                 <div id="lower">
-                    <span class="arrowDown">&#x25BC</span>
+                    <span class="arrowDown">&#x25BC;</span>
                 </div>
             </div>
         </div>
@@ -117,8 +118,12 @@
 <template name="winningTemplate">
     <div id="winnings">
         <div class="gameInfo">
+            <!--
             <span id="winningsHeader">You've won: </span>
             <span id="winningsTally">$100</span>
+            -->
+            <span id="winningsHeader">{{amount_won_text}}</span>
+            <span id="winningsTally">{{amount_won}}</span>
         </div>
     </div>
 </template>
