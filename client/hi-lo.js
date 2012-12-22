@@ -264,10 +264,11 @@ if (Meteor.isClient) {
             // remove the current cards, and automatically start a new round after a short delay
             window.setTimeout(function(){
 
-                alert('drawing new cards to start the next round...');
+                // TODO: rather than using an alert() box or not giving any notification at all, show and
+                // then hide a small div that informs the player that the next round is beginning, and
+                // possibly also show some status information (such as their current streak, etc.)
 
-                // show a little div informing the player that the next round is about to begin...
-
+                //alert('drawing new cards to start the next round...');
 
                 // fade out the current shown cards, remove them from their parent container divs, hide the up/down arrows, update the scoreboard
                 $("#faceUpCard").children().remove();
