@@ -212,6 +212,7 @@ if (Meteor.isClient) {
             // player lost - faceUpCard is of a higher rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
             if (cardComparisonResult == greaterComparator) {
                 curStreak = 0;
+                curScore = 0;
                 game_status_summary = "You lost!";
             }
             // player wins - faceUpCard is of a lower rank than faceDownCard, and the player guessed that the faceDownCard was higher than faceUpCard
