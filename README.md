@@ -47,9 +47,36 @@ your email address and start a game, you will begin to see the email and your hi
 windows - no refresh of the window necessary!  Meteor is automatically pushing updates to the Players collection
 (see model.js) down to all browsers that are connected to the running Meteor server on http://localhost:3000/.
 
+Meteor uses a subset of Mongo DB called "minimongo" to support a document data store.  You can enter the Mongo DB
+shell command by running the following command in the document root of the "hilo" game:
 
+    $ cd hilo
 
-// TODO: enter more explanation here...
+    $ meteor mongo
+    MongoDB shell version: 2.2.1
+    connecting to: 127.0.0.1:3002/meteor
 
+    $ help
+        db.help()                    help on db methods
+        db.mycoll.help()             help on collection methods
+        sh.help()                    sharding helpers
+        rs.help()                    replica set helpers
+        help admin                   administrative help
+        help connect                 connecting to a db help
+        help keys                    key shortcuts
+        help misc                    misc things to know
+        help mr                      mapreduce
 
+        show dbs                     show database names
+        show collections             show collections in current database
+        show users                   show users in current database
+        show profile                 show most recent system.profile entries with time >= 1ms
+        show logs                    show the accessible logger names
+        show log [name]              prints out the last segment of log in memory, 'global' is default
+        use <db_name>                set current database
+        db.foo.find()                list objects in collection foo
+        db.foo.find( { a : 1 } )     list objects in foo where a == 1
+        it                           result of the last line evaluated; use to further iterate
+        DBQuery.shellBatchSize = x   set default number of items to display on shell
+        exit                         quit the mongo shell
 

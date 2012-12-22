@@ -7,12 +7,6 @@
 
 var player = function () {
     return Players.findOne(Session.get('email'));
-    //return Players.findOne(Session.get('email'));
-};
-
-var game = function () {
-    var me = player();
-    return me && me.game_id && Games.findOne(me.game_id);
 };
 
 
@@ -121,7 +115,7 @@ function testGuess() {
 
 
 //////
-////// client-side display logic
+////// client-side display and game functionality logic
 //////
 if (Meteor.isClient) {
 
@@ -163,11 +157,10 @@ if (Meteor.isClient) {
                 }
                 // otherwise add a new player with the specified email to the database
                 else {
-                    var newPlayer = { "email": email, game_id: 123, currentScore: 0, maxScore: 0, streak: 0, idle: false };
+                    var newPlayer = { "email": email, currentScore: 0, maxScore: 0, streak: 0, idle: false };
                     player_id = Players.insert(newPlayer);
                 }
                 Session.set('email',email);
-
 
                 if ( !setPlayerEmail(email) ) {
                     alert('Sorry, your browser either does not support cookies or localStorage; can\'t let you play. Please try a newer browser.');
@@ -196,12 +189,10 @@ if (Meteor.isClient) {
             var lesserComparator = -1;
 
             if (evt.currentTarget.className == "arrowUp") {
-                //alert('clicked HIGHER guess');
                 greaterComparator = 1;
                 lesserComparator = -1;
             }
             else if (evt.currentTarget.className == "arrowDown") {
-                //alert('clicked LOWER guess');
                 greaterComparator = -1;
                 lesserComparator = 1;
             }
@@ -211,21 +202,18 @@ if (Meteor.isClient) {
             $("#faceDownCard > div.card > div.cardfront").css('visibility','visible');
             $("#faceDownCard > div.card > div.cardfront").fadeIn("slow");
 
-
             var justWon = 0;
             var game_status_summary = "";
             var amount_won_text = "";
             var amount_won = "";
 
+            // perform the comparison of the faceUpCard and the faceDownCard
             var cardComparisonResult = testGuess();
 
             // player lost - faceUpCard is of a higher rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
             if (cardComparisonResult == greaterComparator) {
                 curStreak = 0;
                 game_status_summary = "You lost!";
-
-                // TODO: add a dynamic span to the #winningsTally that says "Play Again?", and starts up a new game when clicked
-
             }
             // player wins - faceUpCard is of a lower rank than faceDownCard, and the player guessed that the faceDownCard was higher than faceUpCard
             else if (cardComparisonResult == lesserComparator) {
@@ -241,28 +229,30 @@ if (Meteor.isClient) {
                 amount_won = "$"+ justWon;
             }
 
-            // check if there is an existing player with the same email address already in the database
+            // get a cursor to the current player in the Minimongo DB so we can update them with the round results
+            //
+            // (NOTE: we should be able to directly update a user without first obtaining a DB cursor, but
+            // I was unable to get this to work despite several different attempts/methods tried at doing do)
             var priorPlayersMatchingEmail = Players.find({"email": Session.get('email')}).fetch();
 
-            // update the player if we found one already
+            // update the player in the Minimongo DB with the results of the last round
             if (priorPlayersMatchingEmail != null && priorPlayersMatchingEmail.length > 0) {
                 var priorPlayer = priorPlayersMatchingEmail[0];
                 Players.update({'email': Session.get('email')},
                                {$set:
                                     {'currentScore'  : curScore,
                                      'currentStreak' : curStreak,
-                                     'maxScore'      : Math.max(curScore, priorPlayer.maxScore)
+                                     'maxScore'      : Math.max(curScore, priorPlayer.maxScore),
+                                     'maxStreak'     : Math.max(curStreak, priorPlayer.maxStreak)
                                     }
                                },
-                               {multi: false}
+                               {multi: false} // just update a single document record in the DB
                               );
             }
 
+            // show the game status summary, and then show/hide all the other game outcome details
             $("#gameStatus").css('visibility','visible');
-
-            //$("#gameStatus div.gameInfo span.outcome").text(game_status_summary).fadeIn("slow");
             $("#gameStatus div.gameInfo span.outcome").fadeIn("slow", function(){ $(this).text(game_status_summary); });
-
             $("#higher span.arrowUp").css('visibility','hidden');
             $("#lower span.arrowDown").css('visibility','hidden');
             $("#winnings").css('visibility','visible');
@@ -271,28 +261,19 @@ if (Meteor.isClient) {
             $("#winningsHeader").text(amount_won_text).fadeIn("slow");
             $("#winningsTally").text(amount_won).fadeIn("slow");
 
-
-            //continueGame(), setTimeout(millisecondOperationDelay);
-            //window.setTimeout(continueGame(), 2000);
-
+            // remove the current cards, and automatically start a new round after a short delay
             window.setTimeout(function(){
+
                 alert('drawing new cards to start the next round...');
+
+                // show a little div informing the player that the next round is about to begin...
+
+
                 // fade out the current shown cards, remove them from their parent container divs, hide the up/down arrows, update the scoreboard
                 $("#faceUpCard").children().remove();
                 $("#faceDownCard").children().remove();
-
-
-                //$("#selectionArea").hide();
-
-                //selectionArea
-                //$("#higher span.arrowUp").css('visibility','visible');
-                //$("#lower span.arrowDown").css('visibility','visible');
-
                 continueGame();
-            }, 5000);
-
-
-
+            }, 2500);
         },
     });
 
@@ -367,20 +348,9 @@ Template.scoreboardTemplate.players = function() {
 //////
 Meteor.startup(function () {
 
-    // subscribe to all the players, the game i'm in, and all
-    // the words in that game.
+    // subscribe to all the players
     Meteor.autosubscribe(function () {
         Meteor.subscribe('players');
-
-        /*
-        if (Session.get('player_id')) {
-            var me = player();
-            if (me && me.game_id) {
-                Meteor.subscribe('games', me.game_id);
-                Meteor.subscribe('words', me.game_id, Session.get('player_id'));
-            }
-        }
-        */
     });
 
     // send keepalives so the server can tell when we go away.

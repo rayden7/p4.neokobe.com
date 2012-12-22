@@ -4,7 +4,7 @@
 ******************************************************************************/
 
 /*
-  ALWAYS show the browser scrollbars so that the page doesn't shift when 
+  ALWAYS show the browser scrollbars so that the page doesn't shift when
   showing/hiding divs that extend beyond the current window size
 */
 html {
@@ -242,19 +242,14 @@ footer {
 }
 
 ol {
-    counter-reset:li; /* Initiate a counter */
-    margin-left:0; /* Remove the default left margin */
-    padding-left:0; /* Remove the default left padding */
+    counter-reset: li; /* Initiate a counter */
+    margin-left: 0; /* Remove the default left margin */
+    padding-left: 0; /* Remove the default left padding */
 }
 ol > li {
-    border-radius: 0.5em;
-    -moz-border-radius: 0.5em;
-    -webkit-border-radius: 0.5em;
-
     border-radius: 1em;
     -moz-border-radius: 1em;
     -webkit-border-radius: 1em;
-
     text-align: left;
     position: relative; /* Create a positioning context */
     margin: 0 0 6px 2em; /* Give each list item a left margin to make room for the numbers */
@@ -464,12 +459,6 @@ ol ol li:last-child { margin-bottom:0; }
     display: none;
 }
 
-/*
-#faceDownCard > div.card > div.cardback {
-    display: inline-block;
-}
-*/
-
 #faceDownCard,
 #playerBattlefield {
     float: left;
@@ -508,7 +497,6 @@ ol ol li:last-child { margin-bottom:0; }
 }
 
 .cardback {
-    /*display: none !important;*/
     border-color: #808080 #000000 #000000 #808080;
     background-image: url("../cardback.gif");
     border-radius: 0.5em;
