@@ -37,6 +37,8 @@ Then run these commands from a terminal:
 
     $ cd hilo
 
+    $ meteor remove autopublish
+
     $ meteor
     Running on: http://localhost:3000/
 

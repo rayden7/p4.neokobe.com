@@ -165,6 +165,22 @@ function setUpGameBoard() {
     //alert("setUpGameBoard():\n\tfaceUpCard: [" + faceUpCard.toString() + "]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
     // should have valid faceUpCard and faceDownCard values
 
+    $("#gameStatus div.gameInfo span.outcome").text('');
+    $("#gameStatus").css("visibility","hidden");
+    $("#winningsHeader").text('');
+    $("#winningsTally").text('');
+    $("#winnings").css('visibility','hidden');
+    $("#winningsHeader").css('visibility','hidden');
+    $("#winningsTally").css('visibility','hidden');
+    $("#selectionArea").show();
+    $("#higher span.arrowUp").css('visibility','visible');
+    $("#lower span.arrowDown").css('visibility','visible');
+
+
+    // remove any current cards them from their parent container divs so we can show the new ones
+    $("#faceUpCard").children().remove();
+    $("#faceDownCard").children().remove();
+
     var cardNodeUp = faceUpCard.createNode();
     var cardNodeDown = faceDownCard.createNode();
 
@@ -175,140 +191,22 @@ function setUpGameBoard() {
     $("#faceUpCard").show();
     $("#faceUpCard").css('visibility','visible');
 
-    //$("#faceUpCard").append( faceupCard.createNode() );
-    //$("#faceUpCard").append( cardNodeUp );
 
-    //$("#faceUpCard").append( cardNodeUp ).slideDown( 'slow' );
-    //var cardUp = $(cardNodeUp).hide();
-    //cardUp.appendTo($("#faceUpCard"), function(){ cardUp.slideDown('slow'); } );
-
+    // show the face-up card by sliding down slowly
     $("#faceUpCard").append(cardNodeUp);
     $("#faceUpCard > div.card").hide();
     $("#faceUpCard > div.card").slideDown("slow");
 
 
-
-
-
-    // for the face down-card, we need to do some manipulation of the inner content to show the div classed
-    // with "cardback", and hide the div classed with "cardfront" so that it appears face-down
-
-//    <div class="cardback {{cardColor}}"></div>
-//    <div class="cardfront {{cardColor}}">
-
-
-//    alert('cardNodeDown BEFORE flipping face-down:\n\n' + cardNodeDown);
-//    $(cardNodeDown).children('.cardfront').hide();
-//    $(cardNodeDown).children('.cardback').show();
-//    alert('cardNodeDown AFTER flipping face-down:\n\n' + cardNodeDown);
-
+    // show the back of the face-down card
     $("#faceDownCard").children().remove();
     $("#faceDownCard").show();
     $("#faceDownCard").css('visibility','visible');
-    //$("#faceUpCard").append( faceupCard.createNode() );
-    //$("#faceDownCard").append( cardNodeDown );
-
-
     $("#faceDownCard").append(cardNodeDown);
     $("#faceDownCard > div.card").hide();
     $("#faceDownCard > div.card").slideDown("slow");
-
-
-    //$(cardNodeDown).hide();
-    //$(cardNodeDown).appendTo($("#faceDownCard")).slideDown('slow');
-
-
 }
 
-
-
-/*
-$("#higher span.arrowUp").click(function(){
-
-    alert('clicked HIGHER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
-
-
-});
-
-$("#lower span.arrowDown").click(function(){
-
-    alert('clicked LOWER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
-});
-*/
-
-
-/*
-
-Meteor.methods({
-    newDeck : function() {
-        // Create a new deck of cards and shuffle them
-        deck = new Stack();
-        deck.makeDeck(numDecks);
-        deck.shuffle(numShuffles);
-    },
-
-    drawCards : function(currentDeck) {
-
-        //var cardsValid = false;
-        var potentialFaceUpCard, potentialFaceDownCard;
-        //var k = numCardsPerPlayer;
-
-        //alert("called drawCards(): about to select the cards...\n\ncardsValid: ["+cardsValid+"]\ncurrentDeck.cardCount(): ["+currentDeck.cardCount()+"]");
-        console.log("called drawCards(): about to select the cards...\n\ncardsValid: ["+cardsValid+"]\ncurrentDeck.cardCount(): ["+currentDeck.cardCount()+"]");
-
-        // if we don't have enough cards to go on, create a new deck
-        if (currentDeck.cardCount() <= 1 ) {
-
-
-            //newDeck();
-            Meteor.call('newDeck');
-            drawCards(deck);
-        }
-
-        else if (currentDeck.cardCount() >= 2) {
-
-            // if there aren't enough cards to deal out two more,
-            potentialFaceUpCard = deck.deal();
-            if (potentialFaceUpCard.rank == "A" || potentialFaceUpCard.rank == "2") drawCards(currentDeck);
-            potentialFaceDownCard = deck.deal();
-            if (potentialFaceDownCard.rank == potentialFaceUpCard.rank) drawCards(currentDeck);
-
-            //cardsValid = true;
-            faceUpCard = potentialFaceUpCard;
-            faceDownCard = potentialFaceDownCard;
-        }
-
-        //if (cardsValid) {
-        //    faceUpCard = potentialFaceUpCard;
-        //    faceDownCard = potentialFaceDownCard;
-        //}
-    },
-
-    // start up a new game
-    beginNewGame : function () {
-
-        //alert('starting up a new game!');
-        console.log('starting up a new game!');
-
-        newDeck();
-
-        //alert('just created a new deck of cards, containing: ' + deck.toString() );
-        console.log('just created a new deck of cards, containing: ' + deck.toString() );
-
-        // draw two cards, as long as:
-        //
-        // - the first card, the face-up card, IS NOT an Ace, or a 2 (we can't have the face-up card not
-        //       have a higher or lower card or the game doesn't work)
-        // - the second card, the face-down card, IS NOT the same rank as the first card
-        drawCards(deck);
-
-        //alert("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
-        console.log("cards selected:\n\tfaceUpCard: ["+faceUpCard.toString()+"]\n\tfaceDownCard: ["+faceDownCard.toString()+"]");
-
-        // TODO: manipulate the templates and DOM to show cards appropriately
-    }
-});
-*/
 
 
 if (Meteor.isServer) {

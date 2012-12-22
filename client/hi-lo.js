@@ -6,7 +6,7 @@
 //////
 
 var player = function () {
-    return Players.findOne(Session.get('player_id'));
+    return Players.findOne(Session.get('email'));
     //return Players.findOne(Session.get('email'));
 };
 
@@ -139,7 +139,7 @@ if (Meteor.isClient) {
         // respond to submit events, and also to the user clicking the "Play" button
         'click #play, submit' : function(evt) {
             var alreadyTestedEmail = false;
-            var email = $("#userEmail").val();
+            var email = $("#userEmail").val().trim();
             // hide sections and prompt for correct email if value was invalid
             if (!validateEmail(email)) {                
                 $("#error").show();
@@ -150,10 +150,25 @@ if (Meteor.isClient) {
             }
             // email is valid, register email and close dialog box, begin game
             else {
-                //// this was just a test to insert a player with a non-zero score to see how the sorting was working before that logic is built
-                //var newPlayer = { "email": email, game_id: 123, score: 10000, streak: 0, idle: false };
-                var newPlayer = { "email": email, game_id: 123, currentScore: 0, maxScore: 0, streak: 0, idle: false };
-                var player_id = Players.insert(newPlayer);
+                var player_id = null;
+
+                // check if there is an existing player with the same email address already in the database
+                var priorPlayersMatchingEmail = Players.find({"email": email}).fetch();
+
+                // update the player if we found one already
+                if (priorPlayersMatchingEmail != null && priorPlayersMatchingEmail.length > 0) {
+                    var priorPlayer = priorPlayersMatchingEmail[0];
+                    //player_id = Players.update(priorPlayer, {$set: {maxScore: priorPlayer.maxScore+1, currentScore: 0, streak: 0, idle: false}});
+                    player_id = Players.update(priorPlayer, {$set: {currentScore: 0, streak: 0, idle: false}});
+                }
+                // otherwise add a new player with the specified email to the database
+                else {
+                    var newPlayer = { "email": email, game_id: 123, currentScore: 0, maxScore: 0, streak: 0, idle: false };
+                    player_id = Players.insert(newPlayer);
+                }
+                Session.set('email',email);
+
+
                 if ( !setPlayerEmail(email) ) {
                     alert('Sorry, your browser either does not support cookies or localStorage; can\'t let you play. Please try a newer browser.');
                     exit();                
@@ -174,36 +189,30 @@ if (Meteor.isClient) {
 
     Template.playingAreaCardsTemplate.events({
         'click span.arrowUp, click span.arrowDown' : function(evt) {
-            //alert('clicked HIGHER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
-            //alert('clicked HIGHER OR LOWER guess');
-
-
             // when we compare the cards to determine if the player wins or not, we are comparing the faceUpCard
             // to the faceDownCard, and we need to set the win/lose comparator based on whether the player
             // guessed higher or lower
             var greaterComparator = 1;
             var lesserComparator = -1;
 
-
             if (evt.currentTarget.className == "arrowUp") {
-                alert('clicked HIGHER guess');
-
+                //alert('clicked HIGHER guess');
                 greaterComparator = 1;
                 lesserComparator = -1;
             }
             else if (evt.currentTarget.className == "arrowDown") {
-                alert('clicked LOWER guess');
-
+                //alert('clicked LOWER guess');
                 greaterComparator = -1;
                 lesserComparator = 1;
             }
 
+            // fade in the face-down card's front side so we can see it's rank
             $("#faceDownCard > div.card > div.cardback").css('visibility','hidden');
             $("#faceDownCard > div.card > div.cardfront").css('visibility','visible');
             $("#faceDownCard > div.card > div.cardfront").fadeIn("slow");
 
-            var justWon = 0;
 
+            var justWon = 0;
             var game_status_summary = "";
             var amount_won_text = "";
             var amount_won = "";
@@ -211,17 +220,15 @@ if (Meteor.isClient) {
             var cardComparisonResult = testGuess();
 
             // player lost - faceUpCard is of a higher rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
-            //if (cardComparisonResult == 1) {
             if (cardComparisonResult == greaterComparator) {
-                //alert('you lose!');
                 curStreak = 0;
                 game_status_summary = "You lost!";
+
+                // TODO: add a dynamic span to the #winningsTally that says "Play Again?", and starts up a new game when clicked
+
             }
             // player wins - faceUpCard is of a lower rank than faceDownCard, and the player guessed that the faceDownCard was higher than faceUpCard
-            //else if (cardComparisonResult == -1) {
             else if (cardComparisonResult == lesserComparator) {
-                //alert('you win!');
-
                 curStreak++;
                 if (curStreak == 1) {
                     justWon = 100;
@@ -229,153 +236,64 @@ if (Meteor.isClient) {
                     justWon = (curScore * 2);
                 }
                 curScore += justWon;
-
                 game_status_summary = "You win!";
                 amount_won_text = "You just won: ";
                 amount_won = "$"+ justWon;
-
-                /*
-                $("#gameStatus").css('visibility','visible');
-                $("#gameStatus div.gameInfo span.outcome").text(game_status_summary).fadeIn("slow");
-                $("#winnings").css('visibility','visible');
-                $("#winningsHeader").text(amount_won_text).fadeIn("slow");
-                $("#winningsTally").text(amount_won).fadeIn("slow");
-                */
             }
 
-            //var name = $('#lobby input#myname').val().trim();
-            Players.update(Session.get('player_id'), {$set: {"currentScore": curScore, "currentStreak": curStreak}});
+            // check if there is an existing player with the same email address already in the database
+            var priorPlayersMatchingEmail = Players.find({"email": Session.get('email')}).fetch();
 
-            var game_status_summary = "You win!";
-            var amount_won_text = "You just won: ";
-            var amount_won = "$"+ justWon;
+            // update the player if we found one already
+            if (priorPlayersMatchingEmail != null && priorPlayersMatchingEmail.length > 0) {
+                var priorPlayer = priorPlayersMatchingEmail[0];
+                Players.update({'email': Session.get('email')},
+                               {$set:
+                                    {'currentScore'  : curScore,
+                                     'currentStreak' : curStreak,
+                                     'maxScore'      : Math.max(curScore, priorPlayer.maxScore)
+                                    }
+                               },
+                               {multi: false}
+                              );
+            }
 
             $("#gameStatus").css('visibility','visible');
 
             //$("#gameStatus div.gameInfo span.outcome").text(game_status_summary).fadeIn("slow");
-            $("#gameStatus div.gameInfo span.outcome").fadeIn("slow", function(){ this.text(game_status_summary); });
+            $("#gameStatus div.gameInfo span.outcome").fadeIn("slow", function(){ $(this).text(game_status_summary); });
 
+            $("#higher span.arrowUp").css('visibility','hidden');
+            $("#lower span.arrowDown").css('visibility','hidden');
             $("#winnings").css('visibility','visible');
+            $("#winningsHeader").css('visibility','visible');
+            $("#winningsTally").css('visibility','visible');
             $("#winningsHeader").text(amount_won_text).fadeIn("slow");
             $("#winningsTally").text(amount_won).fadeIn("slow");
 
 
-            //alert('drawing new cards to start the next round...');
+            //continueGame(), setTimeout(millisecondOperationDelay);
+            //window.setTimeout(continueGame(), 2000);
 
-            // fade out the current shown cards, remove them from their parent container divs, hide the up/down arrows, update the scoreboard
-            //$("#faceUpCard").children().remove();
-            //$("#faceDownCard").children().remove();
-            //$("#selectionArea").hide();
-        },
-
-        /*
-        'click span.arrowDown' : function(evt) {
-            //alert('clicked LOWER guess\n\nfaceUpCard: ['+faceUpCard.toString()+']\nfaceDownCard: ['+faceDownCard.toString()+']\nwinningTiers: ['+winningTiers.toString()+']\nprizeTiers: ['+prizeTiers.toString()+']\ngameLevel: ['+gameLevel+']\nnumDecks: ['+numDecks+']\nnumShuffles: ['+numShuffles+']\nmillisecondOperationDelay: ['+millisecondOperationDelay+']\ndelayOperation: ['+delayOperation.toString()+']\ncardsValid: ['+cardsValid+']\n');
-            alert('clicked LOWER guess');
+            window.setTimeout(function(){
+                alert('drawing new cards to start the next round...');
+                // fade out the current shown cards, remove them from their parent container divs, hide the up/down arrows, update the scoreboard
+                $("#faceUpCard").children().remove();
+                $("#faceDownCard").children().remove();
 
 
-//            // TODO: turn over the face-down card to reveal it
-//            $("#faceDownCard > div.card > div.cardback").css('visibility','hidden');
-//            $("#faceDownCard > div.card > div.cardfront").css('visibility','visible');
-//            $("#faceDownCard > div.card > div.cardfront").fadeIn("slow");
-//
-//            var cardComparisonResult = testGuess();
-//            if (cardComparisonResult == 1) {
-//                // player wins - faceUpCard is of a higher rank than faceDownCard, and the player guessed that the faceDownCard was lower than faceUpCard
-//
-//                // TODO: show winning info, update displays, prize count, update Player object in collection, etc.
-//                alert('you win!');
-//
-//            } else if (cardComparisonResult == -1) {
-//                // player loses - faceUpCard is of a lower rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
-//
-//                // TODO: show winning info, update displays, prize count, update Player object in collection, etc.
-//                alert('you lose!');
-//
-//            }
+                //$("#selectionArea").hide();
+
+                //selectionArea
+                //$("#higher span.arrowUp").css('visibility','visible');
+                //$("#lower span.arrowDown").css('visibility','visible');
+
+                continueGame();
+            }, 5000);
 
 
-            $("#faceDownCard > div.card > div.cardback").css('visibility','hidden');
-            $("#faceDownCard > div.card > div.cardfront").css('visibility','visible');
-            $("#faceDownCard > div.card > div.cardfront").fadeIn("slow");
-
-
-            var justWon = 0;
-
-            var game_status_summary = "";
-            var amount_won_text = "";
-            var amount_won = "";
-
-            var cardComparisonResult = testGuess();
-
-            // player lost - faceUpCard is of a higher rank than faceDownCard, but the player guessed that the faceDownCard was higher than faceUpCard
-            if (cardComparisonResult == 1) {
-
-                //alert('you lose!');
-
-                curStreak = 0;
-
-                game_status_summary = "You lost!";
-
-            }
-            // player wins - faceUpCard is of a lower rank than faceDownCard, and the player guessed that the faceDownCard was higher than faceUpCard
-            else if (cardComparisonResult == -1) {
-
-                //alert('you win!');
-
-                //var curScore = 0;
-                curStreak++;
-                //justWon = 0;
-
-                if (curStreak == 1) {
-                    curScore += 100;
-                } else if (curStreak > 1) {
-                    justWon = (curScore * 2);
-                    curScore += justWon;
-                }
-
-                //var name = $('#lobby input#myname').val().trim();
-                //Players.update(Session.get('player_id'), {$set: {"currentScore": curScore, "currentStreak": curStreak}});
-
-                game_status_summary = "You win!";
-                amount_won_text = "You just won: ";
-                amount_won = "$"+ justWon;
-
-//                 $("#gameStatus").css('visibility','visible');
-//                 $("#gameStatus div.gameInfo span.outcome").text(game_status_summary).fadeIn("slow");
-//                 $("#winnings").css('visibility','visible');
-//                 $("#winningsHeader").text(amount_won_text).fadeIn("slow");
-//                 $("#winningsTally").text(amount_won).fadeIn("slow");
-
-            }
-
-
-            //var curScore = 0;
-            //curStreak++;
-
-
-            //var name = $('#lobby input#myname').val().trim();
-            Players.update(Session.get('player_id'), {$set: {"currentScore": curScore, "currentStreak": curStreak}});
-
-            var game_status_summary = "You win!";
-            var amount_won_text = "You just won: ";
-            var amount_won = "$"+ justWon;
-
-            $("#gameStatus").css('visibility','visible');
-            $("#gameStatus div.gameInfo span.outcome").text(game_status_summary).fadeIn("slow");
-            $("#winnings").css('visibility','visible');
-            $("#winningsHeader").text(amount_won_text).fadeIn("slow");
-            $("#winningsTally").text(amount_won).fadeIn("slow");
-
-
-
-            //// fade out the current shown cards, remove them from their parent container divs, hide the up/down arrows, update the scoreboard
-            //$("#faceUpCard").children().remove();
-            //$("#faceDownCard").children().remove();
-            //$("#selectionArea").hide();
 
         },
-        */
     });
 
     // when showing the playerStatus div, look up and display the email that the user is currently playing as
@@ -472,7 +390,7 @@ Meteor.startup(function () {
     // code can go away.
     Meteor.setInterval(function() {
         if (Meteor.status().connected) 
-            Meteor.call('keepalive', Session.get('player_id'));
+            Meteor.call('keepalive', Session.get('email'));
     }, 20*1000);
 
 });
