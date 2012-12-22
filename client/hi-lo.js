@@ -152,7 +152,6 @@ if (Meteor.isClient) {
                 // update the player if we found one already
                 if (priorPlayersMatchingEmail != null && priorPlayersMatchingEmail.length > 0) {
                     var priorPlayer = priorPlayersMatchingEmail[0];
-                    //player_id = Players.update(priorPlayer, {$set: {maxScore: priorPlayer.maxScore+1, currentScore: 0, streak: 0, idle: false}});
                     player_id = Players.update(priorPlayer, {$set: {currentScore: 0, streak: 0, idle: false}});
                 }
                 // otherwise add a new player with the specified email to the database
